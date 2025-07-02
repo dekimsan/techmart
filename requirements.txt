@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+passlib
+python-jose
+slowapi
+pytest
+httpx
+python-dotenv
+python-multipart
+bcrypt
