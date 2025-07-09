@@ -1,16 +1,28 @@
-# models/models.py
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 
 # Определяем возможные роли пользователей
 Role = Literal["admin", "worker", "customer"]
 
-# --- Модели товаров ---
+# --- БАЗОВЫЕ МОДЕЛИ ---
+# Эти модели должны быть определены первыми, так как другие от них наследуются
+
 class ProductBase(BaseModel):
     name: str
     description: str
     price: float
-    quantity: int = Field(..., ge=0) # Количество не может быть отрицательным
+    category: str
+    quantity: int = Field(..., ge=0)
+
+class UserBase(BaseModel):
+    username: str
+    role: Role
+
+class CategoryBase(BaseModel):
+    name: str
+
+# --- МОДЕЛИ ТОВАРОВ ---
+# Эти модели зависят от ProductBase
 
 class ProductCreate(ProductBase):
     pass
@@ -18,14 +30,21 @@ class ProductCreate(ProductBase):
 class Product(ProductBase):
     id: str
 
-# Модель для покупки товара
-class ProductPurchase(BaseModel):
-    quantity: int = Field(1, gt=0) # Покупатель должен указать количество больше 0
+class ProductUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    category: Optional[str] = None
+    quantity: Optional[int] = None
 
-# --- Модели пользователей ---
-class UserBase(BaseModel):
-    username: str
-    role: Role
+class QuantityUpdate(BaseModel):
+    change: int
+
+class ProductPurchase(BaseModel):
+    quantity: int = Field(1, gt=0)
+
+# --- МОДЕЛИ ПОЛЬЗОВАТЕЛЕЙ ---
+# Эти модели зависят от UserBase
 
 class UserCreate(UserBase):
     password: str
@@ -34,11 +53,20 @@ class UserInDB(UserBase):
     id: str
     hashed_password: str
 
-# Модель для отображения информации о пользователе без хеша пароля
 class UserPublic(UserBase):
     id: str
 
-# --- Модели для аутентификации ---
+# --- МОДЕЛИ КАТЕГОРИЙ ---
+# Эти модели зависят от CategoryBase
+
+class CategoryCreate(CategoryBase):
+    pass
+
+class Category(CategoryBase):
+    pass
+
+# --- МОДЕЛИ ДЛЯ АУТЕНТИФИКАЦИИ ---
+
 class Token(BaseModel):
     access_token: str
     token_type: str

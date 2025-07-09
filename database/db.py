@@ -1,11 +1,12 @@
 # database/db.py
 import json
 from typing import List, Dict, Any, Optional
-from models.models import UserInDB, Product
+from models.models import UserInDB, Product, Category
 
 # Пути к файлам данных
 USERS_DB_PATH = "database/users.json"
 PRODUCTS_DB_PATH = "database/products.json"
+CATEGORIES_DB_PATH = "database/categories.json" 
 
 # --- Функции для работы с JSON ---
 def read_data(path: str) -> List[Dict[str, Any]]:
@@ -67,3 +68,10 @@ def get_all_products_db() -> List[Product]:
 
 def save_all_products_db(products: List[Product]):
     write_data(PRODUCTS_DB_PATH, [p.model_dump() for p in products])
+
+def get_all_categories_db() -> List[Category]:
+    categories_data = read_data(CATEGORIES_DB_PATH)
+    return [Category(**cat) for cat in categories_data]
+
+def save_all_categories_db(categories: List[Category]):
+    write_data(CATEGORIES_DB_PATH, [cat.model_dump() for cat in categories])

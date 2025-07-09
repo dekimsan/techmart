@@ -19,10 +19,12 @@ async def read_users(current_user: UserInDB = Depends(get_current_active_user)):
     users = get_all_users_db()
     
     if current_user.role == "admin":
-        return [UserPublic.model_validate(user) for user in users]
+        return [UserPublic.model_validate(user.model_dump()) for user in users]
     
     if current_user.role == "worker":
-        return [UserPublic.model_validate(user) for user in users if user.role in ["worker", "customer"]]
+        filtered_users = [user for user in users if user.role in ["worker", "customer"]]
+        return [UserPublic.model_validate(u.model_dump()) for u in filtered_users]
+
         
     # Покупателям доступ запрещен
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
@@ -39,11 +41,11 @@ async def read_user(user_id: str, current_user: UserInDB = Depends(get_current_a
 
     # Админ видит всех
     if current_user.role == "admin":
-        return UserPublic.model_validate(user)
+        return UserPublic.model_validate(user.model_dump())
     
     # Работник видит работников и покупателей
     if current_user.role == "worker" and user.role in ["worker", "customer"]:
-         return UserPublic.model_validate(user)
+         return UserPublic.model_validate(user.model_dump())
          
     # Если не админ и не работник с нужными правами
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
