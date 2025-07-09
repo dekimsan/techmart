@@ -18,7 +18,7 @@ load_dotenv()
 # --- Конфигурация из переменных окружения ---
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256") # "HS256" как значение по умолчанию
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 420))
 
 # Проверка, что SECRET_KEY установлен
 if SECRET_KEY is None:
