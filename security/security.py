@@ -20,7 +20,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM", "HS256") # "HS256" как значение по умолчанию
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
-# ✅ Проверка, что SECRET_KEY установлен
+# Проверка, что SECRET_KEY установлен
 if SECRET_KEY is None:
     raise ValueError("Необходимо установить SECRET_KEY в .env файле")
 

@@ -1,8 +1,7 @@
 # routers/users.py
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-
-from models.models import UserPublic, UserInDB
+from models.models import UserPublic, UserInDB, UserSearch
 from database.db import get_all_users_db, save_all_users_db, find_user_by_id
 from security.security import get_admin_user, get_worker_user, get_current_active_user
 
@@ -80,3 +79,56 @@ async def delete_user(user_id: str, current_user: UserInDB = Depends(get_current
     users_after_deletion = [user for user in users if user.id != user_id]
     save_all_users_db(users_after_deletion)
     return
+
+# routers/users.py (или где находится ваш эндпоинт)
+
+@router.post("/user/search", response_model=List[UserPublic])
+async def search_users(
+    search_criteria: UserSearch,
+    current_user: UserInDB = Depends(get_current_active_user)
+):
+    """
+    Поиск пользователей по критериям (id, username, role, универсальный поиск).
+    Права доступа применяются в зависимости от роли текущего пользователя.
+    """
+    if current_user.role == "customer":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Customers cannot search for users."
+        )
+
+    all_users = get_all_users_db()
+    if current_user.role == "admin":
+        allowed_users = all_users
+    else:
+        allowed_users = [
+            user for user in all_users if user.role in ["worker", "customer"]
+        ]
+
+    search_results = allowed_users
+    if search_criteria.search:
+        search_term = search_criteria.search.lower()
+        search_results = [
+            user for user in search_results 
+            if search_term in user.username.lower() or search_term in user.id.lower() or search_term in user.role.lower()
+        ]
+
+    if search_criteria.id:
+        search_results = [
+            user for user in search_results if search_criteria.id == user.id
+        ]
+
+    if search_criteria.username:
+        search_term = search_criteria.username.lower()
+        search_results = [
+            user for user in search_results if search_term in user.username.lower()
+        ]
+        
+    if search_criteria.role:
+        search_results = [
+            user for user in search_results if search_criteria.role == user.role
+        ]
+
+    return [UserPublic.model_validate(user.model_dump()) for user in search_results]
+
+

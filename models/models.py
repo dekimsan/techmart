@@ -22,7 +22,6 @@ class CategoryBase(BaseModel):
     name: str
 
 # --- МОДЕЛИ ТОВАРОВ ---
-# Эти модели зависят от ProductBase
 
 class ProductCreate(ProductBase):
     pass
@@ -44,7 +43,6 @@ class ProductPurchase(BaseModel):
     quantity: int = Field(1, gt=0)
 
 # --- МОДЕЛИ ПОЛЬЗОВАТЕЛЕЙ ---
-# Эти модели зависят от UserBase
 
 class UserCreate(UserBase):
     password: str
@@ -57,7 +55,6 @@ class UserPublic(UserBase):
     id: str
 
 # --- МОДЕЛИ КАТЕГОРИЙ ---
-# Эти модели зависят от CategoryBase
 
 class CategoryCreate(CategoryBase):
     pass
@@ -73,3 +70,19 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+# --- Модели поиска ---
+
+class ProductSearch(BaseModel):
+    search: Optional[str] = None
+    id: Optional[str] = None
+    name: Optional[str] = None
+    category: Optional[str] = None
+    min_price: Optional[float] = None
+    max_price: Optional[float] = None
+
+class UserSearch(BaseModel):
+    search: Optional[str] = None
+    id: Optional[str] = None
+    username: Optional[str] = None
+    role: Optional[Role] = None

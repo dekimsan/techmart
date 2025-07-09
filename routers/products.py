@@ -1,6 +1,6 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Form 
-from models.models import ProductUpdate, Product, ProductCreate, ProductPurchase, UserInDB, Category, CategoryCreate, QuantityUpdate
+from models.models import ProductUpdate, Product, ProductCreate, ProductPurchase, UserInDB, Category, CategoryCreate, QuantityUpdate, ProductSearch
 from database.db import get_all_products_db, save_all_products_db, generate_new_id, get_all_categories_db, save_all_categories_db
 from security.security import get_worker_user, get_current_active_user
 
@@ -194,8 +194,6 @@ def get_product_update_from_form(
     quantity: Optional[int] = Form(None)
 ) -> ProductUpdate:
     """Собирает данные из формы в модель ProductUpdate, отбрасывая пустые значения."""
-    # Используем model_dump с exclude_none=True, чтобы передать в основной эндпоинт
-    # только те поля, которые были реально переданы в форме.
     return ProductUpdate(
         name=name,
         description=description,
@@ -211,9 +209,63 @@ async def edit_product_form(
     current_user: UserInDB = Depends(get_worker_user)
 ):
     """Альтернативное редактирование данных товара через form-data."""
-    # Теперь этот эндпоинт просто вызывает основной, передавая ему подготовленные данные
     return await edit_product(
         product_id=product_id,
         product_update=product_update,
         current_user=current_user
     )
+
+@router.post("/products/search", response_model=List[Product])
+async def search_products(
+    search_criteria: ProductSearch,
+    current_user: UserInDB = Depends(get_current_active_user)
+):
+    """
+    Поиск товаров по критериям (название, категория, диапазон цен).
+    Доступен всем авторизованным пользователям.
+    """
+    products = get_all_products_db()
+
+    # Если передан параметр "search", фильтруем по названию, описанию и категории.
+    if search_criteria.search:
+        search_term = search_criteria.search.lower()
+        products = [
+            p for p in products if
+            search_term in p.name.lower() or
+            search_term in p.id.lower() or
+            search_term in p.description.lower() or
+            search_term in p.category.lower()
+        ]
+    
+    # Применяем фильтры последовательно
+    if search_criteria.name:
+        products = [
+            p for p in products 
+            if search_criteria.name.lower() in p.name.lower()
+        ]
+
+    if search_criteria.id:
+        products = [
+            p for p in products 
+            if search_criteria.id.lower() in p.id.lower()
+        ]
+    
+    if search_criteria.category:
+        products = [
+            p for p in products 
+            if search_criteria.category.lower() in p.category.lower()
+        ]
+        
+    if search_criteria.min_price is not None:
+        products = [
+            p for p in products 
+            if p.price >= search_criteria.min_price
+        ]
+        
+    if search_criteria.max_price is not None:
+        products = [
+            p for p in products 
+            if p.price <= search_criteria.max_price
+        ]
+        
+    return products
