@@ -1,4 +1,3 @@
-# security/security.py
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -23,7 +22,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 420))
 # Проверка, что SECRET_KEY установлен
 if SECRET_KEY is None:
     raise ValueError("Необходимо установить SECRET_KEY в .env файле")
-
 
 # --- Утилиты для работы с паролями ---
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

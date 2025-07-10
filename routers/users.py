@@ -1,4 +1,3 @@
-# routers/users.py
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from models.models import UserPublic, UserInDB, UserSearch
@@ -11,9 +10,6 @@ router = APIRouter(prefix="/api", tags=["Users"])
 async def read_users(current_user: UserInDB = Depends(get_current_active_user)):
     """
     Получение списка пользователей в зависимости от роли:
-    - Админ: видит всех.
-    - Работник: видит работников и покупателей.
-    - Покупатель: доступ запрещен.
     """
     users = get_all_users_db()
     
@@ -32,7 +28,6 @@ async def read_users(current_user: UserInDB = Depends(get_current_active_user)):
 async def read_user(user_id: str, current_user: UserInDB = Depends(get_current_active_user)):
     """
     Получение информации о конкретном пользователе.
-    Доступ регулируется ролями.
     """
     user = find_user_by_id(user_id)
     if not user:
@@ -53,7 +48,6 @@ async def read_user(user_id: str, current_user: UserInDB = Depends(get_current_a
 @router.delete("/delete-user/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: str, current_user: UserInDB = Depends(get_current_active_user)):
     """
-    Удаление пользователя.
     - Админ: может удалить любого.
     - Работник: может удалить только покупателя.
     """
@@ -79,8 +73,6 @@ async def delete_user(user_id: str, current_user: UserInDB = Depends(get_current
     users_after_deletion = [user for user in users if user.id != user_id]
     save_all_users_db(users_after_deletion)
     return
-
-# routers/users.py (или где находится ваш эндпоинт)
 
 @router.post("/user/search", response_model=List[UserPublic])
 async def search_users(

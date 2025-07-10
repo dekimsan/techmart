@@ -1,4 +1,3 @@
-# database/db.py
 import json
 from typing import List, Dict, Any, Optional
 from models.models import UserInDB, Product, Category

@@ -1,4 +1,3 @@
-# main.py
 import os
 import time
 from fastapi import FastAPI, Request
@@ -13,24 +12,11 @@ from routers import auth, users, products
 limiter = Limiter(key_func=get_remote_address, default_limits=["100 per minute"])
 
 # --- Инициализация приложения FastAPI ---
-app = FastAPI(title="Technique Store API")
+app = FastAPI(title="TechMart API")
 
 # --- Подключение обработчика исключений для лимитера ---
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-# --- Настройка CORS ---
-# Разрешаем все источники для простоты тестирования.
-# В реальном проекте стоит указать конкретные домены.
-origins = ["*"]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # --- Middleware для логирования запросов (опционально) ---
 @app.middleware("http")
@@ -55,10 +41,10 @@ async def startup_event():
     if not os.path.exists("database/products.json"):
         with open("database/products.json", "w") as f:
             f.write("[]")
+    if not os.path.exists("database/categories.json"):
+        with open("database/categories.json", "w") as f:
+            f.write("[]")
 
 @app.get("/", tags=["Root"])
 async def read_root():
-    return {"message": "Welcome to the Technique Store API!"}
-
-# Для запуска используйте команду в терминале:
-# uvicorn main:app --reload
+    return {"message": "Welcome to the TechMart API!"}
