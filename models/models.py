@@ -4,24 +4,13 @@ from typing import Optional, Literal
 # Определяем возможные роли пользователей
 Role = Literal["admin", "worker", "customer"]
 
-# --- БАЗОВЫЕ МОДЕЛИ ---
-# Эти модели должны быть определены первыми, так как другие от них наследуются
-
+# --- МОДЕЛИ ТОВАРОВ ---
 class ProductBase(BaseModel):
     name: str
     description: str
     price: float
     category: str
     quantity: int = Field(..., ge=0)
-
-class UserBase(BaseModel):
-    username: str
-    role: Role
-
-class CategoryBase(BaseModel):
-    name: str
-
-# --- МОДЕЛИ ТОВАРОВ ---
 
 class ProductCreate(ProductBase):
     pass
@@ -44,7 +33,12 @@ class ProductPurchase(BaseModel):
 
 # --- МОДЕЛИ ПОЛЬЗОВАТЕЛЕЙ ---
 
-class UserCreate(UserBase):
+class UserBase(BaseModel):
+    username: str
+    role: Role
+
+class UserCreate(BaseModel):
+    username: str
     password: str
 
 class UserInDB(UserBase):
@@ -55,6 +49,8 @@ class UserPublic(UserBase):
     id: str
 
 # --- МОДЕЛИ КАТЕГОРИЙ ---
+class CategoryBase(BaseModel):
+    name: str
 
 class CategoryCreate(CategoryBase):
     pass
